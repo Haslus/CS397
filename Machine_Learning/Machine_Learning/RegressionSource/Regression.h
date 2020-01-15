@@ -35,7 +35,10 @@ class Regression
     // Linear regression values will be adjusted for the dataset using gradient descent
     void Iteration();
 
-  private:
+	//My Functions
+	double Cost_Derivative(const std::vector<double>& output, const std::vector<double>& target);
+  
+private:
 	  std::vector<Feature> features;
 	  Dataset dataset;
 	  float lr;
