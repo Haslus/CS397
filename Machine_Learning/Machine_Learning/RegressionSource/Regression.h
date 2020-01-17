@@ -15,6 +15,12 @@ struct Feature
     double theta;    // Constant multiplier of the feature (what the algorithm will adjust)
 };
 
+struct FeatureNorm
+{
+	double mean;
+	double range;
+};
+
 class Regression
 {
   public:
@@ -42,6 +48,8 @@ private:
 	  std::vector<Feature> features;
 	  Dataset dataset;
 	  float lr;
+	  bool meanNormalization;
+	  std::vector<FeatureNorm> feature_norms;
     
 };
 

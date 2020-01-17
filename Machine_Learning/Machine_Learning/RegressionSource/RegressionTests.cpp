@@ -190,9 +190,9 @@ TEST(Regression, LearnMultivariableWithIntercept)
     }
 
     // compute prediction
-    std::vector<double> output = regression.Predict(dataset.first);
+    std::vector<double> output = regression.Predict(test_set.first);
 
-    double cost = regression.Cost(output, dataset.second);
+    double cost = regression.Cost(output, test_set.second);
 
     ASSERT_LT(cost, 0.01);
 }

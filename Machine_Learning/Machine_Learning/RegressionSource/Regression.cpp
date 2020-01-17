@@ -3,19 +3,51 @@
 
 CS397::Regression::Regression(const Dataset & dataset, const std::vector<Feature>& features, double lr, bool meanNormalization)
 {
+	Dataset temp = dataset;
+	feature_norms.resize(features.size());
 	//Normalize if needed
 	if (meanNormalization)
 	{
+		for (unsigned i = 0; i < features.size(); i++)
+		{
+			int index = features[i].inputIdx;
+			if (index == -1)
+				continue;
+			double stack = 0;
+			double max = 0;
+			double min = DBL_MAX;
+			for (unsigned j = 0; j < dataset.first.size(); j++)
+			{
+				double value = temp.first[j][index];
+				stack += value;
 
+				if (value > max)
+					max = value;
+				if (value < min)
+					min = value;
+			}
+			stack /= dataset.first.size();
+			double delta = max - min;
+
+			feature_norms[i] = (FeatureNorm{ stack,max-min });
+			for (unsigned j = 0; j < dataset.first.size(); j++)
+			{
+				temp.first[j][index] = (temp.first[j][index] - stack) / delta;
+			}
+
+		}
 	}
 
 	this->features = features;
-	this->dataset = dataset;
+	this->dataset = temp;
 	this->lr = lr;
+	this->meanNormalization = meanNormalization;
+
 }
 
 double CS397::Regression::Predict(const std::vector<double>& input) const
 {
+	
 	double result = 0;
 	for (unsigned i = 0; i < features.size(); i++)
 	{
@@ -36,7 +68,40 @@ double CS397::Regression::Predict(const std::vector<double>& input) const
 std::vector<double> CS397::Regression::Predict(const std::vector<  std::vector<double>>& input) const
 {
 	std::vector<double> result;
-	for (auto inp : input)
+	std::vector<std::vector<double>> norm_input = input;
+	if (meanNormalization)
+	{
+		for (unsigned i = 0; i < features.size(); i++)
+		{
+			int index = features[i].inputIdx;
+			if (index == -1)
+				continue;
+			double stack = 0;
+			double max = 0;
+			double min = DBL_MAX;
+			for (unsigned j = 0; j < norm_input.size(); j++)
+			{
+				double value = norm_input[j][index];
+				stack += value;
+
+				if (value > max)
+					max = value;
+				if (value < min)
+					min = value;
+			}
+			stack /= norm_input.size();
+			double delta = max - min;
+
+			for (unsigned j = 0; j < norm_input.size(); j++)
+			{
+				norm_input[j][index] = (norm_input[j][index] - feature_norms[i].mean) / feature_norms[i].range;
+			}
+
+		}
+	}
+	
+
+	for (auto inp : norm_input)
 	{
 		result.push_back(Predict(inp));
 	}
