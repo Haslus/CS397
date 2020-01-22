@@ -33,6 +33,7 @@ class Regression
     // Given a single or multiple input datapoint(s), computes the value(s) that the linear regression would predict
     double              Predict(const std::vector<double> & input) const;
     std::vector<double> Predict(const std::vector<std::vector<double>> & input) const;
+	std::vector<double> PredictNormalized(const std::vector<std::vector<double>> & input) const;
 
     // Given the output predicted and the actual real value (target), computes the cost
     double Cost(const std::vector<double> & output,

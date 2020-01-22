@@ -76,21 +76,6 @@ std::vector<double> CS397::Regression::Predict(const std::vector<  std::vector<d
 			int index = features[i].inputIdx;
 			if (index == -1)
 				continue;
-			double stack = 0;
-			double max = 0;
-			double min = DBL_MAX;
-			for (unsigned j = 0; j < norm_input.size(); j++)
-			{
-				double value = norm_input[j][index];
-				stack += value;
-
-				if (value > max)
-					max = value;
-				if (value < min)
-					min = value;
-			}
-			stack /= norm_input.size();
-			double delta = max - min;
 
 			for (unsigned j = 0; j < norm_input.size(); j++)
 			{
@@ -100,6 +85,19 @@ std::vector<double> CS397::Regression::Predict(const std::vector<  std::vector<d
 		}
 	}
 	
+
+	for (auto inp : norm_input)
+	{
+		result.push_back(Predict(inp));
+	}
+
+	return result;
+}
+
+std::vector<double> CS397::Regression::PredictNormalized(const std::vector<std::vector<double>>& input) const
+{
+	std::vector<double> result;
+	std::vector<std::vector<double>> norm_input = input;
 
 	for (auto inp : norm_input)
 	{
@@ -127,8 +125,11 @@ double CS397::Regression::Cost(const std::vector<double>& output, const std::vec
 
 void CS397::Regression::Iteration()
 {
-
-	std::vector<double> prediction = Predict(dataset.first);
+	std::vector<double> prediction;
+	if (!meanNormalization)
+		prediction = Predict(dataset.first);
+	else
+		prediction = PredictNormalized(dataset.first);
 	//std::cout << Cost(prediction, dataset.second) << std::endl;
 	Cost_Derivative(prediction, dataset.second);
 }
