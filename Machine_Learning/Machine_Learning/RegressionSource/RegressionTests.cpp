@@ -241,20 +241,23 @@ Dataset LoadRealStateCSV()
 
 TEST(Regression, HousePriceDeduction)
 {
-    double   learningRate = 1;
+    double   learningRate = 0.1;
     unsigned numberInputs = 6;
     Dataset  dataset      = LoadRealStateCSV();
 
     // STUDENT TEST
 
 	std::vector<Feature> features = { 
-	{-1, 1, 0.0 }, //Intercept, 
+	{-1, 1, 0.0 }, //Intercept
 	{ 0, 1, 0.0 }, //X1 Transaction date 
 	{ 1, 1, 0.0 }, //X2 House age 
 	{ 2, 1, 0.0 }, //X3 Distance to nearest MRT station
+	{ 2, 2, 0.0 }, //X3 Distance to nearest MRT station
 	{ 3, 1, 0.0 }, //X4 Number of stores 
 	{ 4, 1, 0.0 }, //X5 Latitude
-	{ 5, 1, 0.0 }  //X6 Longitude
+	{ 4, 2, 0.0 }, //X5 Latitude
+	{ 5, 1, 0.0 },  //X6 Longitude
+	{ 5, 2, 0.0 }  //X6 Longitude
 	};
 
 	Regression           regression = Regression(dataset, features, learningRate, true);
@@ -269,6 +272,11 @@ TEST(Regression, HousePriceDeduction)
 
 	double cost = regression.Cost(output, dataset.second);
 
+
+	for (auto feat : regression.features)
+		std::cout << feat.theta << std::endl;
+
+	std::cout << cost << std::endl;
 	ASSERT_LT(cost, 45);
 }
 int main(int argc, char ** argv)

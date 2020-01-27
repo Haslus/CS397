@@ -45,12 +45,12 @@ class Regression
 	//My Functions
 	double Cost_Derivative(const std::vector<double>& output, const std::vector<double>& target);
   
+	std::vector<Feature> features;
 private:
-	  std::vector<Feature> features;
-	  Dataset dataset;
-	  float lr;
-	  bool meanNormalization;
-	  std::vector<FeatureNorm> feature_norms;
+	Dataset dataset;
+	float lr;
+	bool meanNormalization;
+	std::vector<FeatureNorm> feature_norms;
     
 };
 
