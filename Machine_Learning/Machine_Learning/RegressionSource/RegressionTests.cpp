@@ -241,29 +241,27 @@ Dataset LoadRealStateCSV()
 
 TEST(Regression, HousePriceDeduction)
 {
-    double   learningRate = 0.1;
+    double   learningRate = 1;
     unsigned numberInputs = 6;
     Dataset  dataset      = LoadRealStateCSV();
 
     // STUDENT TEST
 	Dataset training_set;
-	training_set.first = { dataset.first.begin(), dataset.first.begin() + 250 };
-	training_set.second = { dataset.second.begin(), dataset.second.begin() + 250 };
+	training_set.first = { dataset.first.begin(), dataset.first.begin() + 280 };
+	training_set.second = { dataset.second.begin(), dataset.second.begin() + 280 };
 
 	Dataset test_set;
-	test_set.first = { dataset.first.begin() + 250, dataset.first.end()};
-	test_set.second = { dataset.second.begin() + 250, dataset.second.end()};
+	test_set.first = { dataset.first.begin() + 281, dataset.first.end()};
+	test_set.second = { dataset.second.begin() + 281, dataset.second.end()};
 
 	std::vector<Feature> features = { 
 	{-1, 1, 0.0 }, //Intercept
-	{ 0, 1, 100.0 }, //X1 Transaction date 
-	{ 1, 1, -200.0 }, //X2 House age 
-	{ 2, 1, -250.0 }, //X3 Distance to nearest MRT station
-	{ 3, 1, 300.0 }, //X4 Number of stores 
-	{ 4, 1, 100.0 }, //X5 Latitude
-	{ 4, 2, 100.0 }, //X5 Latitude
-	{ 5, 1, 100.0 }, //X6 Longitude
-	{ 5, 2, 100.0 } //X6 Longitude
+	{ 0, 1, 0.0 }, //X1 Transaction date 
+	{ 1, 1, 0.0 }, //X2 House age 
+	{ 2, 1, 0.0 }, //X3 Distance to nearest MRT station
+	{ 3, 1, 0.0 }, //X4 Number of stores 
+	{ 4, 1, 0.0 }, //X5 Latitude
+	{ 5, 1, 0.0 }, //X6 Longitude
 	};
 
 	Regression           regression = Regression(training_set, features, learningRate, true);
@@ -279,10 +277,10 @@ TEST(Regression, HousePriceDeduction)
 	double cost = regression.Cost(output, test_set.second);
 
 
-	for (auto feat : regression.features)
-		std::cout << feat.theta << std::endl;
-
-	std::cout << cost << std::endl;
+	//for (auto feat : regression.features)
+	//	std::cout << feat.theta << std::endl;
+	//
+	//std::cout << cost << std::endl;
 	ASSERT_LT(cost, 45);
 }
 int main(int argc, char ** argv)

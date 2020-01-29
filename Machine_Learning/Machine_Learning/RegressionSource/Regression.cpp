@@ -127,9 +127,13 @@ void CS397::Regression::Iteration()
 {
 	std::vector<double> prediction;
 	if (!meanNormalization)
+	{
 		prediction = Predict(dataset.first);
+	}
 	else
+	{
 		prediction = PredictNormalized(dataset.first);
+	}
 	//std::cout << Cost(prediction, dataset.second) << std::endl;
 	Cost_Derivative(prediction, dataset.second);
 }
