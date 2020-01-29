@@ -15,6 +15,7 @@ struct Feature
     double theta;    // Constant multiplier of the feature (what the algorithm will adjust)
 };
 
+//Each feature has it's own min and max, used for Normalization
 struct FeatureNorm
 {
 	double mean;
@@ -43,12 +44,12 @@ class Regression
     void Iteration();
 
 	//My Functions
-	double Cost_Derivative(const std::vector<double>& output, const std::vector<double>& target);
+	void Cost_Derivative(const std::vector<double>& output, const std::vector<double>& target);
   
 	std::vector<Feature> features;
 private:
 	Dataset dataset;
-	float lr;
+	double lr;
 	bool meanNormalization;
 	std::vector<FeatureNorm> feature_norms;
     

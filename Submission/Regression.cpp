@@ -69,6 +69,7 @@ std::vector<double> CS397::Regression::Predict(const std::vector<  std::vector<d
 {
 	std::vector<double> result;
 	std::vector<std::vector<double>> norm_input = input;
+	//Normalize the passed data if needed
 	if (meanNormalization)
 	{
 		for (unsigned i = 0; i < features.size(); i++)
@@ -134,16 +135,16 @@ void CS397::Regression::Iteration()
 	{
 		prediction = PredictNormalized(dataset.first);
 	}
-	//std::cout << Cost(prediction, dataset.second) << std::endl;
+
 	Cost_Derivative(prediction, dataset.second);
 }
 
-double CS397::Regression::Cost_Derivative(const std::vector<double>& output, const std::vector<double>& target)
+void CS397::Regression::Cost_Derivative(const std::vector<double>& output, const std::vector<double>& target)
 {
 
 	std::vector<double> new_thetas;
 
-
+	//Calculate the derivative for the new thetas
 	for (unsigned j = 0; j < features.size(); j++)
 	{
 		int index = features[j].inputIdx;
@@ -173,5 +174,5 @@ double CS397::Regression::Cost_Derivative(const std::vector<double>& output, con
 	
 
 
-	return 0.0;
+	return;
 }

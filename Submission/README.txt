@@ -8,6 +8,7 @@ X4 - Number of stores
 X5 - Latitude
 X6 - Longitude
 All of this data is already normalized. The exponent used for the first model is 1 for ALL features.
+Theta is 0.0 by default.
 The theta values that I get are for each feature are:
 X0 - 37.98
 X1 - 4.6
@@ -16,6 +17,12 @@ X3 - -22.05
 X4 - 12.55
 X5 - 17.87
 X6 - 6.38
+
+
+I have also tried using other exponents, combining linear, quadratic and both at the same time.
+Combinations like 1/1/1/2/1/2/2 or 1/1/1/2/2/1/1/1 have not yieled better results, and by that I mean that the cost was always higher.
+Using preset thetas for some values also did not improve the model, and some did improve it, but the function made no sense, at least for me,
+so I discarded then.
 
 o Write down the function the model uses to predict. Explain how you interpret the function you got.
 If we write the previous data as a function, we get:
@@ -47,3 +54,4 @@ If I divide the dataset into training and test set on a 70:30 ratio, it actually
 would might be better than the first one. There are some big differences though, the big one being the latitude and longitude thetas.
 They are now (21.55 and -0.94) respectly, which is pretty different from the previous, which may indeicate that the dataset may be biased,
 so it may not work for fututre data.
+
