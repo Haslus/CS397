@@ -18,6 +18,15 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ClusteringSource\Clustering.h" />
+    <ClInclude Include="ClusteringSource\DatasetCreator.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ClusteringSource\Clustering.cpp" />
+    <ClCompile Include="ClusteringSource\ClusteringTests.cpp" />
+    <ClCompile Include="ClusteringSource\DatasetCreator.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{EF83C8A3-3520-4689-A3DA-B15F57DA5700}</ProjectGuid>
@@ -131,15 +140,6 @@
       <AdditionalDependencies>gtest.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="RegressionSource\DatasetCreator.cpp" />
-    <ClCompile Include="RegressionSource\Regression.cpp" />
-    <ClCompile Include="RegressionSource\RegressionTests.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="RegressionSource\DatasetCreator.h" />
-    <ClInclude Include="RegressionSource\Regression.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
