@@ -93,6 +93,13 @@ class FuzzyCMeans
     // Computes the cost of an external dataset
     double Cost(const Dataset & input);
 
+	/*************************************************/
+	//My Parameters
+	Dataset m_data;
+	double m_fuzziness;
+	std::vector<std::vector<double>> m_initialCentroids;
+	std::vector<std::vector<double>> m_currentCentroids;
+	bool m_meanNormalization;
 };
 } // namespace CS397
 
