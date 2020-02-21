@@ -172,31 +172,182 @@ void CS397::KMeans::CalculateClusters()
 CS397::FuzzyCMeans::FuzzyCMeans(const Dataset & data, const std::vector<std::vector<double>>& initialCentroids, double fuzziness, bool meanNormalization)
 {
 	m_data = data;
-	m_initialCentroids = initialCentroids;
+	m_initialCentroids = m_currentCentroids = initialCentroids;
+
 	m_fuzziness = fuzziness;
 	m_meanNormalization = meanNormalization;
+	m_row_clusters = m_initialCentroids.size();
+	m_column_samples = m_data.size();
+	ProbabilityMatrix = InitialProbabilityMatrix(m_row_clusters, m_column_samples);
+
+
 }
 
 std::vector<std::vector<double>> CS397::FuzzyCMeans::Predict(const Dataset & input) const
 {
-	return std::vector<std::vector<double>>();
+	std::vector<std::vector<double>> total_weights;
+	for (int i = 0; i < m_column_samples; i++)
+	{
+		total_weights.push_back(Predict(input[i]));
+	}
+
+	return total_weights;
 }
 
 std::vector<double> CS397::FuzzyCMeans::Predict(const std::vector<double>& input) const
 {
-	return std::vector<double>();
+	std::vector<double> weight_per_cluster;
+
+	for (int k = 0; k < m_row_clusters; k++)
+	{
+		double top_value = 0;
+		for (int i = 0; i < input.size(); i++)
+		{
+			top_value += input[i] - m_currentCentroids[k][i];
+			
+		}
+
+		double final_result = 0;
+
+		for (int j = 0; j < m_row_clusters; j++)
+		{
+
+			double bot_value = 0;
+
+			for (int i = 0; i < input.size(); i++)
+			{
+				bot_value += input[i] - m_currentCentroids[j][i];
+			}
+
+			if (bot_value == 0)
+			{
+				
+				weight_per_cluster = std::vector<double>(m_row_clusters, 0);
+				weight_per_cluster[j] = 1;
+				return weight_per_cluster;
+				
+			}
+
+			final_result += pow((top_value / bot_value), 2.0f / (m_fuzziness - 1.0f));
+		}
+
+		//final_result = pow(final_result, 2.0f / (m_fuzziness - 1.0f));
+
+		weight_per_cluster.push_back(1.0f / final_result);
+	}
+
+	//Check for errors
+	double total = 0;
+	for (auto w : weight_per_cluster)
+	{
+		total += w;
+	}
+	if (std::abs(1.0f - total) > 0.1f)
+	{
+		return std::vector<double>(m_row_clusters, 0);
+	}
+	else
+		return weight_per_cluster;
 }
 
 void CS397::FuzzyCMeans::Iteration()
 {
+	UpdateCentroids();
+	auto values = Predict(m_data);
+	UpdateProbabilityMatrix(values);
 }
 
 double CS397::FuzzyCMeans::Cost()
 {
-	return 0.0;
+	double result = 0;
+	for (int m = 0; m < m_column_samples; m++)
+	{
+		for (int k = 0; k < m_row_clusters; k++)
+		{
+			int w = ProbabilityMatrix[m_row_clusters * k + m];
+
+			w = pow(w, m_fuzziness);
+
+			std::vector<double> sample = m_data[m];
+
+			double sample_cost = 0;
+			for (int s = 0; s < sample.size(); s++)
+			{
+				sample_cost += sample[s] - m_currentCentroids[k][s];
+			}
+
+			result += w * pow(sample_cost, 2);
+
+		}
+	}
+
+	return result;
 }
 
 double CS397::FuzzyCMeans::Cost(const Dataset & input)
 {
-	return 0.0;
+	auto values = Predict(input);
+	UpdateProbabilityMatrix(values);
+
+	double result = 0;
+	for (int k = 0; k < m_row_clusters; k++)
+	{
+		for (int m = 0; m < m_column_samples; m++)
+		{
+		
+			double w = ProbabilityMatrix[m_column_samples * k + m];
+
+
+			std::vector<double> sample = input[m];
+
+			double sample_cost = 0;
+			for (int s = 0; s < sample.size(); s++)
+			{
+				sample_cost += sample[s] - m_currentCentroids[k][s];
+			}
+
+			result += pow(w, m_fuzziness) * (sample_cost * sample_cost);
+
+		}
+	}
+
+	return result;
+}
+
+void CS397::FuzzyCMeans::UpdateCentroids()
+{
+	for (int k = 0; k < m_row_clusters; k++)
+	{
+		
+		for (int s = 0; s < m_data[0].size(); s++)
+		{
+			double top_value = 0;
+			double bot_value = 0;
+
+			for (int i = 0; i < m_column_samples; i++)
+			{
+				double w = ProbabilityMatrix[m_row_clusters * k + i];
+
+
+				top_value += w * m_data[i][s];
+				bot_value += w;
+			}
+
+			m_currentCentroids[k][s] = top_value / bot_value;
+
+		}
+
+	}
+
+}
+
+void CS397::FuzzyCMeans::UpdateProbabilityMatrix(const std::vector<std::vector<double>> & values)
+{
+	for (int k = 0; k < m_row_clusters; k++)
+	{
+		for (int i = 0; i < m_column_samples; i++)
+		{
+			ProbabilityMatrix[m_column_samples * k + i] = values[i][k];
+		}
+	}
 }

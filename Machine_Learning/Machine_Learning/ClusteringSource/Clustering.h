@@ -44,35 +44,35 @@ class KMeans
 
 class FuzzyCMeans
 {
-    private:
-    static std::vector<double> InitialProbabilityMatrix(unsigned r, unsigned c)
-    {
-        std::vector<double> mat(r * c);
+private:
+	static std::vector<double> InitialProbabilityMatrix(unsigned r, unsigned c)
+	{
+		std::vector<double> mat(r * c);
 
-        // initialize probability matrix to random probabilities
-        for (unsigned i = 0; i < r; i++)
-        {
-            double total = 0.0;
+		// initialize probability matrix to random probabilities
+		for (unsigned i = 0; i < r; i++)
+		{
+			double total = 0.0;
 
-            // give random probabilities to each cluster
-            for (unsigned j = 0; j < c; j++)
-            {
-                double value = static_cast<double>(std::rand()) / RAND_MAX;
+			// give random probabilities to each cluster
+			for (unsigned j = 0; j < c; j++)
+			{
+				double value = static_cast<double>(std::rand()) / RAND_MAX;
 
-                mat[i * c + j] = value;
+				mat[i * c + j] = value;
 
-                total += value;
-            }
+				total += value;
+			}
 
-            // since all probabilities need to add up to 1 normalize probabilities
-            for (unsigned j = 0; j < c; j++)
-            {
-                mat[i * c + j] /= total;
-            }
-        }
+			// since all probabilities need to add up to 1 normalize probabilities
+			for (unsigned j = 0; j < c; j++)
+			{
+				mat[i * c + j] /= total;
+			}
+		}
 
 		return mat;
-    }
+	}
     
   public:
     FuzzyCMeans(const Dataset &                          data,             // Dataset clusters will generated for
@@ -94,12 +94,19 @@ class FuzzyCMeans
     double Cost(const Dataset & input);
 
 	/*************************************************/
+	//My Functions
+	void UpdateCentroids();
+	void UpdateProbabilityMatrix(const std::vector<std::vector<double>> & values);
+
 	//My Parameters
 	Dataset m_data;
 	double m_fuzziness;
 	std::vector<std::vector<double>> m_initialCentroids;
 	std::vector<std::vector<double>> m_currentCentroids;
 	bool m_meanNormalization;
+	int m_row_clusters;
+	int m_column_samples;
+	std::vector<double> ProbabilityMatrix;
 };
 } // namespace CS397
 

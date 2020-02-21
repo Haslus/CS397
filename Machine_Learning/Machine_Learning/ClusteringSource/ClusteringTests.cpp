@@ -240,11 +240,11 @@ TEST(FuzzyCMeans, Cost_1D)
 
     double cost = fuzzyCMeans.Cost(trainSet);
 
-    ASSERT_NEAR(cost, 0.61, 0.01);
+    ASSERT_NEAR(cost, 0.08, 0.01);
 
     cost = fuzzyCMeans.Cost(testSet);
 
-    ASSERT_NEAR(cost, 0.57, 0.01);
+    ASSERT_NEAR(cost, 0.08, 0.01);
 }
 				  
 TEST(FuzzyCMeans, Cost_2D)
@@ -264,11 +264,11 @@ TEST(FuzzyCMeans, Cost_2D)
 
     double cost = fuzzyCMeans.Cost(trainSet);
 
-    ASSERT_NEAR(cost, 3.65, 0.01);
+    ASSERT_NEAR(cost, 1.29, 0.01);
 
     cost = fuzzyCMeans.Cost(testSet);
 
-    ASSERT_NEAR(cost, 4.00, 0.01);
+    ASSERT_NEAR(cost, 1.33, 0.01);
 }
 				  
 TEST(FuzzyCMeans, Cost_10D)
@@ -288,11 +288,11 @@ TEST(FuzzyCMeans, Cost_10D)
 
     double cost = fuzzyCMeans.Cost(trainSet);
 
-    ASSERT_NEAR(cost, 1.22, 0.01);
+    ASSERT_NEAR(cost, 0.14, 0.01);
 
     cost = fuzzyCMeans.Cost(testSet);
 
-    ASSERT_NEAR(cost, 1.15, 0.01);
+    ASSERT_NEAR(cost, 0.14, 0.01);
 }
 				  
 TEST(FuzzyCMeans, Iterate1D)
@@ -307,20 +307,21 @@ TEST(FuzzyCMeans, Iterate1D)
     const Dataset & trainSet = splittedDataset.first;
     const Dataset & testSet  = splittedDataset.second;
 
-    KMeans kMeans = KMeans(trainSet, { trainSet[0], trainSet[1], trainSet[2] }, false);
+    const double Fuzziness = 2.0;
+    FuzzyCMeans  fuzzyCMeans = FuzzyCMeans(trainSet, { trainSet[0], trainSet[1], trainSet[2] }, Fuzziness, false);
 
-    double cost = kMeans.Cost(testSet);
+    double cost = fuzzyCMeans.Cost(testSet);
 
-    ASSERT_NEAR(cost, 0.60, 0.01);
+    ASSERT_NEAR(cost, 0.34, 0.01);
 
     for (unsigned i = 0; i < 2; i++)
     {
-        kMeans.Iteration();
+        fuzzyCMeans.Iteration();
     }
 
-    cost = kMeans.Cost(testSet);
+    cost = fuzzyCMeans.Cost(testSet);
 
-    ASSERT_NEAR(cost, 0.25, 0.01);
+    ASSERT_NEAR(cost, 0.8, 0.01);
 }
 				  
 TEST(FuzzyCMeans, Iterate2D)
@@ -340,7 +341,7 @@ TEST(FuzzyCMeans, Iterate2D)
 
     double cost = fuzzyCMeans.Cost(testSet);
 
-    ASSERT_NEAR(cost, 5.46, 0.01);
+    ASSERT_NEAR(cost, 1.03, 0.01);
 
     for (unsigned i = 0; i < 5; i++)
     {
@@ -349,7 +350,7 @@ TEST(FuzzyCMeans, Iterate2D)
 
     cost = fuzzyCMeans.Cost(testSet);
 
-    ASSERT_NEAR(cost, 3.95, 0.01);
+    ASSERT_NEAR(cost, 1.23, 0.01);
 }
 				  
 TEST(FuzzyCMeans, Iterate10D)
@@ -369,7 +370,7 @@ TEST(FuzzyCMeans, Iterate10D)
 
     double cost = fuzzyCMeans.Cost(testSet);
 
-    ASSERT_NEAR(cost, 14.06, 0.01);
+    ASSERT_NEAR(cost, 2.91, 0.01);
 
     for (unsigned i = 0; i < 5; i++)
     {
@@ -378,7 +379,7 @@ TEST(FuzzyCMeans, Iterate10D)
 
     cost = fuzzyCMeans.Cost(testSet);
 
-    ASSERT_NEAR(cost, 4.67, 0.01);
+    ASSERT_NEAR(cost, 4.64, 0.01);
 }
 
 TEST(FuzzyCMeans, Predict2D)
