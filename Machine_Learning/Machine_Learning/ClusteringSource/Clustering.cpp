@@ -186,7 +186,7 @@ CS397::FuzzyCMeans::FuzzyCMeans(const Dataset & data, const std::vector<std::vec
 std::vector<std::vector<double>> CS397::FuzzyCMeans::Predict(const Dataset & input) const
 {
 	std::vector<std::vector<double>> total_weights;
-	for (int i = 0; i < m_column_samples; i++)
+	for (int i = 0; i < input.size(); i++)
 	{
 		total_weights.push_back(Predict(input[i]));
 	}
@@ -203,12 +203,12 @@ std::vector<double> CS397::FuzzyCMeans::Predict(const std::vector<double>& input
 		double top_value = 0;
 		for (int i = 0; i < input.size(); i++)
 		{
-			top_value += input[i] - m_currentCentroids[k][i];
-			
+			double value = input[i] - m_currentCentroids[k][i];
+			top_value += value * value;
 		}
 
 		double final_result = 0;
-
+		top_value = sqrt(top_value);
 		for (int j = 0; j < m_row_clusters; j++)
 		{
 
@@ -216,7 +216,8 @@ std::vector<double> CS397::FuzzyCMeans::Predict(const std::vector<double>& input
 
 			for (int i = 0; i < input.size(); i++)
 			{
-				bot_value += input[i] - m_currentCentroids[j][i];
+				double value = input[i] - m_currentCentroids[j][i];
+				bot_value += value * value;
 			}
 
 			if (bot_value == 0)
@@ -228,10 +229,8 @@ std::vector<double> CS397::FuzzyCMeans::Predict(const std::vector<double>& input
 				
 			}
 
-			final_result += pow((top_value / bot_value), 2.0f / (m_fuzziness - 1.0f));
+			final_result += pow((top_value / sqrt(bot_value)), 2.0f / (m_fuzziness - 1.0f));
 		}
-
-		//final_result = pow(final_result, 2.0f / (m_fuzziness - 1.0f));
 
 		weight_per_cluster.push_back(1.0f / final_result);
 	}
@@ -254,7 +253,7 @@ void CS397::FuzzyCMeans::Iteration()
 {
 	UpdateCentroids();
 	auto values = Predict(m_data);
-	UpdateProbabilityMatrix(values);
+	ProbabilityMatrix = StoreProbabilityMatrix(values);
 }
 
 double CS397::FuzzyCMeans::Cost()
@@ -264,54 +263,54 @@ double CS397::FuzzyCMeans::Cost()
 	{
 		for (int k = 0; k < m_row_clusters; k++)
 		{
-			int w = ProbabilityMatrix[m_row_clusters * k + m];
 
-			w = pow(w, m_fuzziness);
+			double w = ProbabilityMatrix[k * m_column_samples + m];
 
 			std::vector<double> sample = m_data[m];
 
 			double sample_cost = 0;
 			for (int s = 0; s < sample.size(); s++)
 			{
-				sample_cost += sample[s] - m_currentCentroids[k][s];
+				double value = sample[s] - m_currentCentroids[k][s];
+				sample_cost += value * value;
 			}
 
-			result += w * pow(sample_cost, 2);
+			result += pow(w, m_fuzziness) * (sample_cost);
 
 		}
 	}
 
-	return result;
+	return result / m_data.size();
 }
 
 double CS397::FuzzyCMeans::Cost(const Dataset & input)
 {
-	auto values = Predict(input);
-	UpdateProbabilityMatrix(values);
-
+	std::vector<std::vector<double>> values = Predict(input);
+	//std::vector<double> matrix = StoreProbabilityMatrix(values);
+	
 	double result = 0;
-	for (int k = 0; k < m_row_clusters; k++)
+	for (int m = 0; m < input.size(); m++)
 	{
-		for (int m = 0; m < m_column_samples; m++)
+		for (int k = 0; k < m_row_clusters; k++)
 		{
 		
-			double w = ProbabilityMatrix[m_column_samples * k + m];
-
+			double w = values[m][k];
 
 			std::vector<double> sample = input[m];
 
 			double sample_cost = 0;
 			for (int s = 0; s < sample.size(); s++)
 			{
-				sample_cost += sample[s] - m_currentCentroids[k][s];
+				double value = sample[s] - m_currentCentroids[k][s];
+				sample_cost += value * value;
 			}
 
-			result += pow(w, m_fuzziness) * (sample_cost * sample_cost);
+			result += pow(w, m_fuzziness) * (sample_cost);
 
 		}
 	}
 
-	return result;
+	return result / input.size();
 }
 
 void CS397::FuzzyCMeans::UpdateCentroids()
@@ -326,8 +325,8 @@ void CS397::FuzzyCMeans::UpdateCentroids()
 
 			for (int i = 0; i < m_column_samples; i++)
 			{
-				double w = ProbabilityMatrix[m_row_clusters * k + i];
-
+				double w = ProbabilityMatrix[m_column_samples * k + i];
+				w = pow(w, m_fuzziness);
 
 				top_value += w * m_data[i][s];
 				bot_value += w;
@@ -341,13 +340,16 @@ void CS397::FuzzyCMeans::UpdateCentroids()
 
 }
 
-void CS397::FuzzyCMeans::UpdateProbabilityMatrix(const std::vector<std::vector<double>> & values)
+std::vector<double> CS397::FuzzyCMeans::StoreProbabilityMatrix(const std::vector<std::vector<double>> & values)
 {
+	std::vector<double> matrix;
 	for (int k = 0; k < m_row_clusters; k++)
 	{
 		for (int i = 0; i < m_column_samples; i++)
 		{
-			ProbabilityMatrix[m_column_samples * k + i] = values[i][k];
+			matrix.push_back(values[i][k]);
 		}
 	}
+
+	return matrix;
 }

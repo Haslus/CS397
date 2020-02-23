@@ -96,7 +96,7 @@ private:
 	/*************************************************/
 	//My Functions
 	void UpdateCentroids();
-	void UpdateProbabilityMatrix(const std::vector<std::vector<double>> & values);
+	std::vector<double> StoreProbabilityMatrix(const std::vector<std::vector<double>> & values);
 
 	//My Parameters
 	Dataset m_data;
