@@ -1,5 +1,5 @@
 #include "Clustering.h"
-
+#include <iostream>
 /***********************************************
 
 	Custom Constructor
@@ -224,7 +224,7 @@ std::vector<double> CS397::FuzzyCMeans::Predict(const std::vector<double>& input
 			{
 				
 				weight_per_cluster = std::vector<double>(m_row_clusters, 0);
-				weight_per_cluster[j] = 1;
+				weight_per_cluster[j] = 1.0f;
 				return weight_per_cluster;
 				
 			}
@@ -251,9 +251,11 @@ std::vector<double> CS397::FuzzyCMeans::Predict(const std::vector<double>& input
 
 void CS397::FuzzyCMeans::Iteration()
 {
+	//std::cout << Cost() << std::endl;
 	UpdateCentroids();
 	auto values = Predict(m_data);
 	ProbabilityMatrix = StoreProbabilityMatrix(values);
+	//std::cout << Cost() << std::endl;
 }
 
 double CS397::FuzzyCMeans::Cost()
@@ -280,13 +282,13 @@ double CS397::FuzzyCMeans::Cost()
 		}
 	}
 
-	return result / m_data.size();
+	return static_cast<float>(result / m_data.size());
 }
 
 double CS397::FuzzyCMeans::Cost(const Dataset & input)
 {
 	std::vector<std::vector<double>> values = Predict(input);
-	//std::vector<double> matrix = StoreProbabilityMatrix(values);
+	std::vector<double> matrix = StoreProbabilityMatrix(values);
 	
 	double result = 0;
 	for (int m = 0; m < input.size(); m++)
@@ -294,7 +296,7 @@ double CS397::FuzzyCMeans::Cost(const Dataset & input)
 		for (int k = 0; k < m_row_clusters; k++)
 		{
 		
-			double w = values[m][k];
+			double w = matrix[k * input.size() + m];
 
 			std::vector<double> sample = input[m];
 
@@ -310,7 +312,7 @@ double CS397::FuzzyCMeans::Cost(const Dataset & input)
 		}
 	}
 
-	return result / input.size();
+	return static_cast<float>(result / input.size());
 }
 
 void CS397::FuzzyCMeans::UpdateCentroids()
@@ -345,7 +347,7 @@ std::vector<double> CS397::FuzzyCMeans::StoreProbabilityMatrix(const std::vector
 	std::vector<double> matrix;
 	for (int k = 0; k < m_row_clusters; k++)
 	{
-		for (int i = 0; i < m_column_samples; i++)
+		for (int i = 0; i < values.size(); i++)
 		{
 			matrix.push_back(values[i][k]);
 		}

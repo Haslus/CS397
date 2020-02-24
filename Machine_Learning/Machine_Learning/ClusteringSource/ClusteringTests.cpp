@@ -477,7 +477,28 @@ TEST(KMeans, Iris)
 {
     Dataset dataset = LoadIris();
 
+	int size = 75;
+	Dataset trainSet = { dataset.begin(), dataset.begin() + size };
+	Dataset testSet = { dataset.begin() + size, dataset.end() };
     // STUDENT TEST
+	const double   BlobSize = 1.0;
+	const unsigned NumClusters = 3;
+	const unsigned FeatureCount = 4;
+	srand(1);
+	int rand1 = rand() % size;
+	int rand2 = rand() % size;
+	int rand3 = rand() % size;
+	KMeans kMeans = KMeans(trainSet, { trainSet[rand1], trainSet[rand2], trainSet[rand3] }, false);
+
+	double cost = kMeans.Cost(testSet);
+
+	for (unsigned i = 0; i < 15; i++)
+	{
+		kMeans.Iteration();
+		cost = kMeans.Cost(testSet);
+	}
+
+
 }
 
 Dataset LoadMallCustomers()
