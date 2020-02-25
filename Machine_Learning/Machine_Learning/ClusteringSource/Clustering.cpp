@@ -13,9 +13,36 @@ CS397::KMeans::KMeans(const Dataset & data, const std::vector<std::vector<double
 	this->m_meanNormalization = meanNormalization;
 
 	this->m_number_of_clusters = this->m_initialCentroids.size();
+
 	if (m_meanNormalization)
 	{
+		for (int f = 0; f < m_data[0].size(); f++)
+		{
+			double min = -DBL_MAX, max = DBL_MAX, mean = 0;
 
+			for (int i = 0; i < m_data.size(); i++)
+			{
+				double value = m_data[i][f];
+
+				mean += value;
+
+				if (value < min)
+					min = value;
+
+				if (value > max)
+					max = value;
+			}
+
+			mean /= m_data.size();
+
+			double delta = max - min;
+			for (int i = 0; i < m_data.size(); i++)
+			{
+				double value = m_data[i][f];
+
+				m_data[i][f] = (value - mean) / delta;
+			}
+		}
 	}
 
 	
@@ -76,13 +103,15 @@ void CS397::KMeans::Iteration()
 {
 	//Predict values (Assign closest Centroid)
 	m_cluster_index = Predict(m_data);
-	//Calculate Cost
-	//Cost();
 	//Assign new centroids
 	CalculateClusters();
 
 }
+/***********************************************
 
+	Get cost of the training set
+
+***********************************************/
 double CS397::KMeans::Cost()
 {
 	double total_cost = 0;
@@ -106,7 +135,11 @@ double CS397::KMeans::Cost()
 
 	return total_cost;
 }
+/***********************************************
 
+	Get cost of the test set
+
+***********************************************/
 double CS397::KMeans::Cost(const Dataset & input)
 {
 	m_cluster_index = Predict(input);
@@ -131,7 +164,11 @@ double CS397::KMeans::Cost(const Dataset & input)
 
 	return total_cost;
 }
+/***********************************************
 
+	Recalculate new positions for the centroids
+
+***********************************************/
 void CS397::KMeans::CalculateClusters()
 {
 	//Cluster->Samples->Sample Data
@@ -168,7 +205,11 @@ void CS397::KMeans::CalculateClusters()
 		m_currentCentroids[i] = average;
 	}
 }
+/***********************************************
 
+	Custom constructor
+
+***********************************************/
 CS397::FuzzyCMeans::FuzzyCMeans(const Dataset & data, const std::vector<std::vector<double>>& initialCentroids, double fuzziness, bool meanNormalization)
 {
 	m_data = data;
@@ -180,9 +221,44 @@ CS397::FuzzyCMeans::FuzzyCMeans(const Dataset & data, const std::vector<std::vec
 	m_column_samples = m_data.size();
 	ProbabilityMatrix = InitialProbabilityMatrix(m_row_clusters, m_column_samples);
 
+	if (m_meanNormalization)
+	{
+		for (int f = 0; f < m_data[0].size(); f++)
+		{
+			double min = -DBL_MAX, max = DBL_MAX, mean = 0;
+
+			for (int i = 0; i < m_data.size(); i++)
+			{
+				double value = m_data[i][f];
+
+				mean += value;
+
+				if (value < min)
+					min = value;
+
+				if (value > max)
+					max = value;
+			}
+
+			mean /= m_data.size();
+
+			double delta = max - min;
+			for (int i = 0; i < m_data.size(); i++)
+			{
+				double value = m_data[i][f];
+
+				m_data[i][f] = (value - mean) / delta;
+			}
+		}
+	}
+
 
 }
+/***********************************************
 
+	Predict for all samples
+
+***********************************************/
 std::vector<std::vector<double>> CS397::FuzzyCMeans::Predict(const Dataset & input) const
 {
 	std::vector<std::vector<double>> total_weights;
@@ -193,7 +269,11 @@ std::vector<std::vector<double>> CS397::FuzzyCMeans::Predict(const Dataset & inp
 
 	return total_weights;
 }
+/***********************************************
 
+	Predict a sample
+
+***********************************************/
 std::vector<double> CS397::FuzzyCMeans::Predict(const std::vector<double>& input) const
 {
 	std::vector<double> weight_per_cluster;
@@ -248,16 +328,22 @@ std::vector<double> CS397::FuzzyCMeans::Predict(const std::vector<double>& input
 	else
 		return weight_per_cluster;
 }
+/***********************************************
 
+	Iterate to learn
+
+***********************************************/
 void CS397::FuzzyCMeans::Iteration()
 {
-	//std::cout << Cost() << std::endl;
 	UpdateCentroids();
 	auto values = Predict(m_data);
 	ProbabilityMatrix = StoreProbabilityMatrix(values);
-	//std::cout << Cost() << std::endl;
 }
+/***********************************************
 
+	Cost from the training set
+
+***********************************************/
 double CS397::FuzzyCMeans::Cost()
 {
 	double result = 0;
@@ -284,7 +370,11 @@ double CS397::FuzzyCMeans::Cost()
 
 	return static_cast<float>(result / m_data.size());
 }
+/***********************************************
 
+	Cost from a given input
+
+***********************************************/
 double CS397::FuzzyCMeans::Cost(const Dataset & input)
 {
 	std::vector<std::vector<double>> values = Predict(input);
@@ -314,7 +404,11 @@ double CS397::FuzzyCMeans::Cost(const Dataset & input)
 
 	return static_cast<float>(result / input.size());
 }
+/***********************************************
 
+	Update new positions for the centroids
+
+***********************************************/
 void CS397::FuzzyCMeans::UpdateCentroids()
 {
 	for (int k = 0; k < m_row_clusters; k++)
@@ -341,7 +435,12 @@ void CS397::FuzzyCMeans::UpdateCentroids()
 	}
 
 }
+/***********************************************
 
+	Convert std::vector/vector/double to
+	std::vector/double
+
+***********************************************/
 std::vector<double> CS397::FuzzyCMeans::StoreProbabilityMatrix(const std::vector<std::vector<double>> & values)
 {
 	std::vector<double> matrix;
