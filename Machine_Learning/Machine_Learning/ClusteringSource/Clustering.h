@@ -31,6 +31,7 @@ class KMeans
 	/*************************************************/
 	//My Parameters
 	void CalculateClusters();
+	void OutputClusters();
 
 	Dataset m_data;
 	std::vector<std::vector<double>> m_initialCentroids;

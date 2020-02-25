@@ -343,9 +343,10 @@ TEST(FuzzyCMeans, Iterate2D)
 
     ASSERT_NEAR(cost, 1.03, 0.01);
 
-    for (unsigned i = 0; i < 5; i++)
+    for (unsigned i = 0; i < 20; i++)
     {
         fuzzyCMeans.Iteration();
+		cost = fuzzyCMeans.Cost(testSet);
     }
 
     cost = fuzzyCMeans.Cost(testSet);
@@ -492,13 +493,13 @@ TEST(KMeans, Iris)
 
 	double cost = kMeans.Cost(testSet);
 
-	for (unsigned i = 0; i < 15; i++)
+	for (unsigned i = 0; i < 3; i++)
 	{
 		kMeans.Iteration();
 		cost = kMeans.Cost(testSet);
 	}
 
-
+	kMeans.OutputClusters();
 }
 
 Dataset LoadMallCustomers()

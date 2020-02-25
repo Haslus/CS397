@@ -1,5 +1,7 @@
 #include "Clustering.h"
 #include <iostream>
+#include <fstream>
+#include <string>
 /***********************************************
 
 	Custom Constructor
@@ -84,7 +86,7 @@ unsigned CS397::KMeans::Predict(const std::vector<double>& input) const
 		}
 
 		//If the centroid is near, assign
-		if (current_result < result)
+		if (current_result <= result)
 		{
 			result = current_result;
 			index = c;
@@ -207,14 +209,54 @@ void CS397::KMeans::CalculateClusters()
 }
 /***********************************************
 
+	Write the clusters into a .csv
+
+***********************************************/
+void CS397::KMeans::OutputClusters()
+{
+	//Write clusters as strings
+	std::vector<std::vector<std::string>> text_clusters;
+	text_clusters.resize(m_currentCentroids.size());
+	for (int i = 0; i < m_currentCentroids.size(); i++)
+	{
+		for (int j = 0; j < m_currentCentroids[0].size(); j++)
+		{
+			text_clusters[i].push_back(std::to_string(m_currentCentroids[i][j]));
+		}
+	}
+	std::ofstream outfile;
+	outfile.open("OutIris.csv");
+	if (outfile.is_open())
+	{
+		outfile << "ID,sepal length in cm,sepal width in cm,petal length in cm,petal width in cm\n";
+		for (int i = 0; i < text_clusters.size(); i++)
+		{
+			outfile << std::to_string(i + 1);
+			outfile << ',';
+			for (int j = 0; j < text_clusters[0].size(); j++)
+			{
+				outfile << text_clusters[i][j];
+				outfile << ',';
+			}
+			outfile << '\n';
+		}
+		
+
+
+		outfile.close();
+	}
+
+}
+/***********************************************
+
 	Custom constructor
 
 ***********************************************/
 CS397::FuzzyCMeans::FuzzyCMeans(const Dataset & data, const std::vector<std::vector<double>>& initialCentroids, double fuzziness, bool meanNormalization)
 {
 	m_data = data;
-	m_initialCentroids = m_currentCentroids = initialCentroids;
-
+	m_initialCentroids =  initialCentroids;
+	m_currentCentroids = initialCentroids;
 	m_fuzziness = fuzziness;
 	m_meanNormalization = meanNormalization;
 	m_row_clusters = m_initialCentroids.size();
@@ -288,7 +330,7 @@ std::vector<double> CS397::FuzzyCMeans::Predict(const std::vector<double>& input
 		}
 
 		double final_result = 0;
-		top_value = sqrt(top_value);
+		top_value = std::sqrt(top_value);
 		for (int j = 0; j < m_row_clusters; j++)
 		{
 
@@ -304,29 +346,30 @@ std::vector<double> CS397::FuzzyCMeans::Predict(const std::vector<double>& input
 			{
 				
 				weight_per_cluster = std::vector<double>(m_row_clusters, 0);
-				weight_per_cluster[j] = 1.0f;
+				weight_per_cluster[j] = 1.0;
 				return weight_per_cluster;
 				
 			}
 
-			final_result += pow((top_value / sqrt(bot_value)), 2.0f / (m_fuzziness - 1.0f));
+			final_result += std::pow(top_value / std::sqrt(bot_value), 2.0 / (m_fuzziness - 1.0));
 		}
 
-		weight_per_cluster.push_back(1.0f / final_result);
+		weight_per_cluster.push_back(1.0 / final_result);
 	}
 
-	//Check for errors
-	double total = 0;
-	for (auto w : weight_per_cluster)
-	{
-		total += w;
-	}
-	if (std::abs(1.0f - total) > 0.1f)
-	{
-		return std::vector<double>(m_row_clusters, 0);
-	}
-	else
-		return weight_per_cluster;
+	////Check for errors
+	//double total = 0;
+	//for (auto w : weight_per_cluster)
+	//{
+	//	total += w;
+	//}
+	//if (std::abs(1.0f - total) > 0.1)
+	//{
+	//	return std::vector<double>(m_row_clusters, 0);
+	//}
+	//else
+
+	return weight_per_cluster;
 }
 /***********************************************
 
@@ -422,7 +465,7 @@ void CS397::FuzzyCMeans::UpdateCentroids()
 			for (int i = 0; i < m_column_samples; i++)
 			{
 				double w = ProbabilityMatrix[m_column_samples * k + i];
-				w = pow(w, m_fuzziness);
+				w = std::pow(w, m_fuzziness);
 
 				top_value += w * m_data[i][s];
 				bot_value += w;
