@@ -26,6 +26,15 @@ class MarkovChain
     // returns the last computed values of each state
     std::vector<double> GetStateValues() const;
 
+	double OtherStateSumation(const int& currentState, const std::vector<double>& values) const;
+	std::vector<double> Concatenate(const std::vector<double>& A, const std::vector<double>& B, int size) const;
+
+	//Student Stuff
+	double mDiscountFactor;
+	TransitionMatrix mOriginalTtransitionMat;
+	TransitionMatrix mTtransitionMat;
+	std::vector<MarkovState> mStates;
+	std::vector<double> mStatesValues;
 };
 
 } // namespace CS397

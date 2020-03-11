@@ -15,21 +15,24 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ClusteringSource\Clustering.h">
+    <ClInclude Include="MarkovSource\MarkovChain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ClusteringSource\DatasetCreator.h">
+    <ClInclude Include="MarkovSource\MarkovDecisionProcess.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MarkovSource\MarkovUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ClusteringSource\ClusteringTests.cpp">
+    <ClCompile Include="MarkovSource\MarkovTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ClusteringSource\DatasetCreator.cpp">
+    <ClCompile Include="MarkovSource\MarkovDecisionProcess.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ClusteringSource\Clustering.cpp">
+    <ClCompile Include="MarkovSource\MarkovChain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

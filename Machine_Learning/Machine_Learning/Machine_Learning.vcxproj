@@ -19,13 +19,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ClusteringSource\Clustering.h" />
-    <ClInclude Include="ClusteringSource\DatasetCreator.h" />
+    <ClInclude Include="MarkovSource\MarkovChain.h" />
+    <ClInclude Include="MarkovSource\MarkovDecisionProcess.h" />
+    <ClInclude Include="MarkovSource\MarkovUtils.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ClusteringSource\Clustering.cpp" />
-    <ClCompile Include="ClusteringSource\ClusteringTests.cpp" />
-    <ClCompile Include="ClusteringSource\DatasetCreator.cpp" />
+    <ClCompile Include="MarkovSource\MarkovChain.cpp" />
+    <ClCompile Include="MarkovSource\MarkovDecisionProcess.cpp" />
+    <ClCompile Include="MarkovSource\MarkovTests.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
