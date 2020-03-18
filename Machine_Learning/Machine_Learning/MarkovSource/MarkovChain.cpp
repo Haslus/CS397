@@ -68,8 +68,6 @@ double CS397::MarkovChain::OtherStateSumation(const int& currentState, const std
 	double value = 0;
 	for (int i = 0; i < mStates.size(); i++)
 	{
-		//if (i == currentState)
-		//	continue;
 		value += mStatesValues[i] * mTtransitionMat.mValues[currentState * mTtransitionMat.mSize + i];
 	}
 

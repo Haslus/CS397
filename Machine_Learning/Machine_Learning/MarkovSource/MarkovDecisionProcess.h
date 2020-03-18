@@ -23,6 +23,16 @@ class MarkovDecisionProcess
     std::vector<double> GetStateValues() const;
     // returns the last computed best policy (action to take in each state)
     std::vector<unsigned> GetBestPolicy() const;
+
+
+	//Student stuff
+	double OtherStateSumation(const int& currentState, int & best_action);
+
+	std::vector<MarkovState> states;
+	std::vector<MarkovAction> actions;
+	double discountFactor;
+	std::vector<double> stateValues;
+	std::vector<unsigned> bestPolicy;
 };
 
 } // namespace CS397
