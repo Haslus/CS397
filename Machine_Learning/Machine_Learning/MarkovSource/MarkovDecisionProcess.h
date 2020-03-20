@@ -12,9 +12,9 @@ class MarkovDecisionProcess
 {
   public:
     // constructor receives all the data to execute the algorithm
-    MarkovDecisionProcess(const std::vector<MarkovState> &  states,  // container of the different states to analyze
-                          const std::vector<MarkovAction> & actions, // actions that can be taken (they store their respective transition matrices)
-                          double                            discountFactor);                    // discount factor that reduces the rewards every transition
+    MarkovDecisionProcess(const std::vector<MarkovState> &  mStates,  // container of the different states to analyze
+                          const std::vector<MarkovAction> & mActions, // actions that can be taken (they store their respective transition matrices)
+                          double                            mDiscountFactor);                    // discount factor that reduces the rewards every transition
 
     // iterates on the state values and best policy once
     void Iteration();
@@ -28,11 +28,11 @@ class MarkovDecisionProcess
 	//Student stuff
 	double OtherStateSumation(const int& currentState, int & best_action);
 
-	std::vector<MarkovState> states;
-	std::vector<MarkovAction> actions;
-	double discountFactor;
-	std::vector<double> stateValues;
-	std::vector<unsigned> bestPolicy;
+	std::vector<MarkovState> mStates;
+	std::vector<MarkovAction> mActions;
+	double mDiscountFactor;
+	std::vector<double> mStateValues;
+	std::vector<unsigned> mBestPolicy;
 };
 
 } // namespace CS397

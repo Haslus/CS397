@@ -1,18 +1,23 @@
 #include "MarkovChain.h"
 
-CS397::MarkovChain::MarkovChain(const std::vector<MarkovState>& states, const std::vector<double>& transitionMat, double discountFactor)
+/*
+	Custom constructor
+*/
+CS397::MarkovChain::MarkovChain(const std::vector<MarkovState>& States, const std::vector<double>& transitionMat, double discountFactor)
 {
-	mTtransitionMat.mSize = sqrt(transitionMat.size());
+	mTtransitionMat.mSize = static_cast<int>(sqrt(transitionMat.size()));
 	mTtransitionMat.mValues = transitionMat;
 	mOriginalTtransitionMat = mTtransitionMat;
 	mDiscountFactor = discountFactor;
-	mStates = states;
+	mStates = States;
 	mStatesValues = std::vector<double>(mStates.size(), {0});
 }
 
+/*
+	Iterate once and get new state values
+*/
 void CS397::MarkovChain::Iteration()
 {
-	//std::vector<double> tempStatesValues = mStatesValues;
 
 	std::vector<double> tempStatesValues = std::vector<double>(mStates.size(), { 0 });
 	
@@ -22,27 +27,31 @@ void CS397::MarkovChain::Iteration()
 			
 	}
 
-	//mTtransitionMat.mValues = Concatenate(mTtransitionMat.mValues, mOriginalTtransitionMat.mValues, mTtransitionMat.mSize);
 	mStatesValues = tempStatesValues;
 }
 
+/*
+	Given an initial probability for each state and a defined
+	number of transitions, the function will return the probability of being in each state
+	after those transitions
+*/
 std::vector<double> CS397::MarkovChain::GetProbabilityNTransitions(const std::vector<double> initialProbabilities, unsigned numTransitions) const
 {
 	std::vector<double> result = initialProbabilities;
 
 	TransitionMatrix mat = mTtransitionMat;
 
-	for (int i = 0; i < numTransitions; i++)
+	for (unsigned i = 0; i < numTransitions; i++)
 	{
 		mat.mValues = Concatenate(mat.mValues, mTtransitionMat.mValues, mat.mSize);
 	}
 
 	std::vector<double> temp;
-	for (int j = 0; j < mat.mSize; j++)
+	for (unsigned j = 0; j < mat.mSize; j++)
 	{
 		double value = 0;
 
-		for (int k = 0; k < mat.mSize; k++)
+		for (unsigned k = 0; k < mat.mSize; k++)
 		{
 			value += result[k] * mat.mValues[mat.mSize * k + j];
 
@@ -57,12 +66,16 @@ std::vector<double> CS397::MarkovChain::GetProbabilityNTransitions(const std::ve
 
 	
 }
-
+/*
+	Returns the current state values
+*/
 std::vector<double> CS397::MarkovChain::GetStateValues() const
 {
 	return mStatesValues;
 }
-
+/*
+	Sumation of the rewards of other states
+*/
 double CS397::MarkovChain::OtherStateSumation(const int& currentState, const std::vector<double>& values) const
 {
 	double value = 0;
@@ -73,7 +86,9 @@ double CS397::MarkovChain::OtherStateSumation(const int& currentState, const std
 
 	return value;
 }
-
+/*
+	Multiplication between two matrices
+*/
 std::vector<double> CS397::MarkovChain::Concatenate(const std::vector<double> & A, const std::vector<double> & B, int size) const
 {
 	std::vector<double> mat = std::vector<double>(A.size(), { 0 });
@@ -86,10 +101,10 @@ std::vector<double> CS397::MarkovChain::Concatenate(const std::vector<double> & 
 
 			std::vector<double> A_row,B_column;
 			for (int j = 0; j < size; j++)
+			{
 				A_row.push_back(A[i * size + j]);
-
-			for (int j = 0; j < size; j++)
 				B_column.push_back(B[j * size + col]);
+			}
 
 			for (int c = 0; c < size; c++)
 				value += A_row[c] * B_column[c];

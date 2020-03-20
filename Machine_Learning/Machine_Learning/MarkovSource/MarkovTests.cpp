@@ -426,7 +426,7 @@ TEST(MarkovDecisionProcess, GridWorld_DF099_R2)
     AssertVectors<unsigned>({ 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0 }, mdp.GetBestPolicy());
 }
 
-void LoadGridWorld(const std::string & filename, double reward, std::vector<MarkovState> & states, std::vector<MarkovAction> & actions)
+void LoadGridWorld(const std::string & filename, double reward, std::vector<MarkovState> & mStates, std::vector<MarkovAction> & mActions)
 {
     std::ifstream inFile(filename);
 
@@ -456,122 +456,122 @@ void LoadGridWorld(const std::string & filename, double reward, std::vector<Mark
 
         if (value == "0")
         {
-            states.push_back({ std::to_string(cellName), reward });
+            mStates.push_back({ std::to_string(cellName), reward });
             stateToIndex[cellName] = index++;
         }
         else if (value != "X")
         {
-            states.push_back({ std::to_string(cellName), std::atof(value.c_str()), true });
+            mStates.push_back({ std::to_string(cellName), std::atof(value.c_str()), true });
             stateToIndex[cellName] = index++;
         }
         cellName++;
     }
 
     // create transition matrices for each action
-    std::vector<double> upTransition(states.size() * states.size(), 0.0);
-    std::vector<double> rightTransition(states.size() * states.size(), 0.0);
-    std::vector<double> downTransition(states.size() * states.size(), 0.0);
-    std::vector<double> leftTransition(states.size() * states.size(), 0.0);
+    std::vector<double> upTransition(mStates.size() * mStates.size(), 0.0);
+    std::vector<double> rightTransition(mStates.size() * mStates.size(), 0.0);
+    std::vector<double> downTransition(mStates.size() * mStates.size(), 0.0);
+    std::vector<double> leftTransition(mStates.size() * mStates.size(), 0.0);
 
     // fill the matrices
-    for (unsigned i = 0; i < states.size(); i++)
+    for (unsigned i = 0; i < mStates.size(); i++)
     {
-        int cellNameIndex = std::atoi(states[i].mName.c_str());
+        int cellNameIndex = std::atoi(mStates[i].mName.c_str());
         int cellIndex     = stateToIndex[cellNameIndex];
 
         // self transition is always possible
-        upTransition[cellIndex * states.size() + cellIndex]    = 1.0;
-        rightTransition[cellIndex * states.size() + cellIndex] = 1.0;
-        downTransition[cellIndex * states.size() + cellIndex]  = 1.0;
-        leftTransition[cellIndex * states.size() + cellIndex]  = 1.0;
+        upTransition[cellIndex * mStates.size() + cellIndex]    = 1.0;
+        rightTransition[cellIndex * mStates.size() + cellIndex] = 1.0;
+        downTransition[cellIndex * mStates.size() + cellIndex]  = 1.0;
+        leftTransition[cellIndex * mStates.size() + cellIndex]  = 1.0;
 
         // set transtions for up action (move up can lead to up/left/right)
         int upIdx = cellNameIndex - width;
         if (stateToIndex.find(upIdx) != stateToIndex.end())
         {
-            upTransition[i * states.size() + stateToIndex[upIdx]] = 8.0;
+            upTransition[i * mStates.size() + stateToIndex[upIdx]] = 8.0;
 
-            rightTransition[i * states.size() + stateToIndex[upIdx]] = 0.1;
-            leftTransition[i * states.size() + stateToIndex[upIdx]]  = 0.1;
+            rightTransition[i * mStates.size() + stateToIndex[upIdx]] = 0.1;
+            leftTransition[i * mStates.size() + stateToIndex[upIdx]]  = 0.1;
         }
 
         // set transtions for right action (move up can lead to right/down/up)
         int rightIdx = (cellNameIndex + 1) % width == 0 ? -1 : cellNameIndex + 1;
         if (stateToIndex.find(rightIdx) != stateToIndex.end())
         {
-            rightTransition[i * states.size() + stateToIndex[rightIdx]] = 8.0;
+            rightTransition[i * mStates.size() + stateToIndex[rightIdx]] = 8.0;
 
-            upTransition[i * states.size() + stateToIndex[rightIdx]]   = 0.1;
-            downTransition[i * states.size() + stateToIndex[rightIdx]] = 0.1;
+            upTransition[i * mStates.size() + stateToIndex[rightIdx]]   = 0.1;
+            downTransition[i * mStates.size() + stateToIndex[rightIdx]] = 0.1;
         }
 
         // set transtions for down action (move up can lead to down/right/left)
         int downIdx = (cellNameIndex + width) > width * height ? -1 : cellNameIndex + width;
         if (stateToIndex.find(downIdx) != stateToIndex.end())
         {
-            downTransition[i * states.size() + stateToIndex[downIdx]] = 8.0;
+            downTransition[i * mStates.size() + stateToIndex[downIdx]] = 8.0;
 
-            rightTransition[i * states.size() + stateToIndex[downIdx]] = 0.1;
-            leftTransition[i * states.size() + stateToIndex[downIdx]]  = 0.1;
+            rightTransition[i * mStates.size() + stateToIndex[downIdx]] = 0.1;
+            leftTransition[i * mStates.size() + stateToIndex[downIdx]]  = 0.1;
         }
 
         // set transtions for left action (move up can lead to left/up/down)
         int leftIdx = cellNameIndex % width == 0 ? -1 : cellNameIndex - 1;
         if (stateToIndex.find(leftIdx) != stateToIndex.end())
         {
-            leftTransition[i * states.size() + stateToIndex[leftIdx]] = 8.0;
+            leftTransition[i * mStates.size() + stateToIndex[leftIdx]] = 8.0;
 
-            upTransition[i * states.size() + stateToIndex[leftIdx]]   = 0.1;
-            downTransition[i * states.size() + stateToIndex[leftIdx]] = 0.1;
+            upTransition[i * mStates.size() + stateToIndex[leftIdx]]   = 0.1;
+            downTransition[i * mStates.size() + stateToIndex[leftIdx]] = 0.1;
         }
     }
 
     // normalize transitions so that all probabilities add up to one
-    for (unsigned i = 0; i < states.size(); i++)
+    for (unsigned i = 0; i < mStates.size(); i++)
     {
         double sumUp    = 0.0;
         double sumRight = 0.0;
         double sumDown  = 0.0;
         double sumLeft  = 0.0;
 
-        for (unsigned j = 0; j < states.size(); j++)
+        for (unsigned j = 0; j < mStates.size(); j++)
         {
-            sumUp += upTransition[i * states.size() + j];
-            sumRight += rightTransition[i * states.size() + j];
-            sumDown += downTransition[i * states.size() + j];
-            sumLeft += leftTransition[i * states.size() + j];
+            sumUp += upTransition[i * mStates.size() + j];
+            sumRight += rightTransition[i * mStates.size() + j];
+            sumDown += downTransition[i * mStates.size() + j];
+            sumLeft += leftTransition[i * mStates.size() + j];
         }
 
-        for (unsigned j = 0; j < states.size(); j++)
+        for (unsigned j = 0; j < mStates.size(); j++)
         {
             if (sumUp != 0.0)
-                upTransition[i * states.size() + j] /= sumUp;
+                upTransition[i * mStates.size() + j] /= sumUp;
             if (sumRight != 0.0)
-                rightTransition[i * states.size() + j] /= sumRight;
+                rightTransition[i * mStates.size() + j] /= sumRight;
             if (sumDown != 0.0)
-                downTransition[i * states.size() + j] /= sumDown;
+                downTransition[i * mStates.size() + j] /= sumDown;
             if (sumLeft != 0.0)
-                leftTransition[i * states.size() + j] /= sumLeft;
+                leftTransition[i * mStates.size() + j] /= sumLeft;
         }
     }
 
     // add actions to list
-    actions.push_back({ "Up", { static_cast<unsigned>(states.size()), upTransition } });
-    actions.push_back({ "Right", { static_cast<unsigned>(states.size()), rightTransition } });
-    actions.push_back({ "Down", { static_cast<unsigned>(states.size()), downTransition } });
-    actions.push_back({ "Left", { static_cast<unsigned>(states.size()), leftTransition } });
+    mActions.push_back({ "Up", { static_cast<unsigned>(mStates.size()), upTransition } });
+    mActions.push_back({ "Right", { static_cast<unsigned>(mStates.size()), rightTransition } });
+    mActions.push_back({ "Down", { static_cast<unsigned>(mStates.size()), downTransition } });
+    mActions.push_back({ "Left", { static_cast<unsigned>(mStates.size()), leftTransition } });
 }
 
 TEST(MarkovDecisionProcess, GridWorld01_DF09_R001)
 {
     const double Reward = -0.01;
 
-    std::vector<MarkovState>  states;
-    std::vector<MarkovAction> actions;
+    std::vector<MarkovState>  mStates;
+    std::vector<MarkovAction> mActions;
 
-    LoadGridWorld("GridWorld01.txt", Reward, states, actions);
+    LoadGridWorld("GridWorld01.txt", Reward, mStates, mActions);
 
-    MarkovDecisionProcess mdp = MarkovDecisionProcess(states, actions, 0.9);
+    MarkovDecisionProcess mdp = MarkovDecisionProcess(mStates, mActions, 0.9);
 
     for (size_t i = 0; i < 100; i++)
     {
@@ -585,12 +585,12 @@ TEST(MarkovDecisionProcess, GridWorld10x10_DF09R001)
 {
     const double Reward = -0.01;
 
-    std::vector<MarkovState>  states;
-    std::vector<MarkovAction> actions;
+    std::vector<MarkovState>  mStates;
+    std::vector<MarkovAction> mActions;
 
-    LoadGridWorld("GridWorld10x10.txt", Reward, states, actions);
+    LoadGridWorld("GridWorld10x10.txt", Reward, mStates, mActions);
 
-    MarkovDecisionProcess mdp = MarkovDecisionProcess(states, actions, 0.98);
+    MarkovDecisionProcess mdp = MarkovDecisionProcess(mStates, mActions, 0.98);
 
     for (size_t i = 0; i < 100; i++)
     {
@@ -606,7 +606,7 @@ TEST(MarkovDecisionProcess, GridWorld10x10_DF09R001)
         if (cellIndex % 10 == 0)
             std::cout << std::endl;
 
-        int cellName = std::atoi(states[i].mName.c_str());
+        int cellName = std::atoi(mStates[i].mName.c_str());
 
         for (int j = cellIndex; j < (cellName); j++)
         {

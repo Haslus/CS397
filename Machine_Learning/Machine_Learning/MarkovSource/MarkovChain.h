@@ -12,9 +12,9 @@ class MarkovChain
 {
   public:
     // constructor receives all the data to execute the algorithm
-    MarkovChain(const std::vector<MarkovState> & states,        // container of the different states to analyze
+    MarkovChain(const std::vector<MarkovState> & mStates,        // container of the different states to analyze
                 const std::vector<double> &      transitionMat, // transition matrix with probabilities of transitioning between states
-                double                           discountFactor);                         // discount factor that reduces the rewards every transition
+                double                           mDiscountFactor);                         // discount factor that reduces the rewards every transition
 
 	// iterates on the state values once
     void                Iteration();

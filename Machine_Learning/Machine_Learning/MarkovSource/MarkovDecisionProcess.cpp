@@ -1,53 +1,65 @@
 #include "MarkovDecisionProcess.h"
 
-CS397::MarkovDecisionProcess::MarkovDecisionProcess(const std::vector<MarkovState>& states, const std::vector<MarkovAction>& actions, double discountFactor)
+/*
+	Custom constructor
+*/
+CS397::MarkovDecisionProcess::MarkovDecisionProcess(const std::vector<MarkovState>& mStates, const std::vector<MarkovAction>& mActions, double mDiscountFactor)
 {
-	this->states = states;
-	this->actions = actions;
-	this->discountFactor = discountFactor;
-	this->stateValues = std::vector<double>(states.size(), { 0 });
-	this->bestPolicy = std::vector<unsigned>(states.size(), { 0 });
+	this->mStates = mStates;
+	this->mActions = mActions;
+	this->mDiscountFactor = mDiscountFactor;
+	this->mStateValues = std::vector<double>(mStates.size(), { 0 });
+	this->mBestPolicy = std::vector<unsigned>(mStates.size(), { 0 });
 }
-
+/*
+	Iterate once and calculate new state values
+*/
 void CS397::MarkovDecisionProcess::Iteration()
 {
-	std::vector<double> tempStatesValues = std::vector<double>(states.size(), { 0 });
+	std::vector<double> tempStatesValues = std::vector<double>(mStates.size(), { 0 });
 	int best_action;
-	for (int j = 0; j < states.size(); j++)
+	for (int j = 0; j < mStates.size(); j++)
 	{
 		
-		tempStatesValues[j] = states[j].mReward + discountFactor * OtherStateSumation(j, best_action);
-		bestPolicy[j] = (best_action);
+		tempStatesValues[j] = mStates[j].mReward + mDiscountFactor * OtherStateSumation(j, best_action);
+		mBestPolicy[j] = (best_action);
 
-		if (states[j].mStatic)
+		if (mStates[j].mStatic)
 		{
-			tempStatesValues[j] = states[j].mReward;
+			tempStatesValues[j] = mStates[j].mReward;
 		}
 	}
 	
-	stateValues = tempStatesValues;
+	mStateValues = tempStatesValues;
 }
 
+/*
+	Get current state values
+*/
 std::vector<double> CS397::MarkovDecisionProcess::GetStateValues() const
 {
-	return stateValues;
+	return mStateValues;
 }
-
+/*
+	Get best policy so far
+*/
 std::vector<unsigned> CS397::MarkovDecisionProcess::GetBestPolicy() const
 {
-	return bestPolicy;
+	return mBestPolicy;
 }
-
+/*
+	Helper function that acts as the sumation of the rewards of other states + the policy
+*/
 double CS397::MarkovDecisionProcess::OtherStateSumation(const int& currentState, int & best_action)
 {
 	double value = 0;
-	std::vector<double> tempactions = std::vector<double>(actions.size(), { 0 });
+	std::vector<double> tempactions = std::vector<double>(mActions.size(), { 0 });
 
-	for (int j = 0; j < actions.size(); j++)
+	for (int j = 0; j < mActions.size(); j++)
 	{
-		for (int i = 0; i < states.size(); i++)
+		for (int i = 0; i < mStates.size(); i++)
 		{
-			tempactions[j] += stateValues[i] * actions[j].mTransitionMat.mValues[currentState * actions[j].mTransitionMat.mSize + i];
+			tempactions[j] += mStateValues[i] * mActions[j].mTransitionMat.mValues[currentState * mActions[j].mTransitionMat.mSize + i];
 		}
 	}
 
