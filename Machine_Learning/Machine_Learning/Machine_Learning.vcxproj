@@ -19,14 +19,29 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MarkovSource\MarkovChain.h" />
-    <ClInclude Include="MarkovSource\MarkovDecisionProcess.h" />
-    <ClInclude Include="MarkovSource\MarkovUtils.h" />
+    <ClCompile Include="NeuralNetSource\ActivationFunctions.cpp" />
+    <ClCompile Include="NeuralNetSource\DatasetCreator.cpp" />
+    <ClCompile Include="NeuralNetSource\NeuralNet.cpp" />
+    <ClCompile Include="NeuralNetSource\NeuralNetTests.cpp" />
+    <ClCompile Include="NeuralNetSource\PRNG.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="MarkovSource\MarkovChain.cpp" />
-    <ClCompile Include="MarkovSource\MarkovDecisionProcess.cpp" />
-    <ClCompile Include="MarkovSource\MarkovTests.cpp" />
+    <ClInclude Include="mnist\mnist_reader.hpp" />
+    <ClInclude Include="mnist\mnist_reader_common.hpp" />
+    <ClInclude Include="mnist\mnist_reader_less.hpp" />
+    <ClInclude Include="mnist\mnist_utils.hpp" />
+    <ClInclude Include="NeuralNetSource\ActivationFunctions.h" />
+    <ClInclude Include="NeuralNetSource\DatasetCreator.h" />
+    <ClInclude Include="NeuralNetSource\mnist\mnist_reader.hpp" />
+    <ClInclude Include="NeuralNetSource\mnist\mnist_reader_common.hpp" />
+    <ClInclude Include="NeuralNetSource\mnist\mnist_reader_less.hpp" />
+    <ClInclude Include="NeuralNetSource\mnist\mnist_utils.hpp" />
+    <ClInclude Include="NeuralNetSource\NeuralNet.h" />
+    <ClInclude Include="NeuralNetSource\PRNG.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="mnist\mnist_reader.hpp.gch" />
+    <None Include="NeuralNetSource\mnist\mnist_reader.hpp.gch" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
