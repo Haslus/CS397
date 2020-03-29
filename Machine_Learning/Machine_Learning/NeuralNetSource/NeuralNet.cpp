@@ -94,10 +94,11 @@ std::vector<double> CS397::NeuralNet::ForwardPropagation(const std::vector<doubl
 
 void CS397::NeuralNet::Iteration()
 {
+
 	for (int i = 0; i < mdata.first.size(); i++)
 	{
 		std::vector<double> output = ForwardPropagation(mdata.first[i]);
-		BackPropagation(output, mdata.second[i]);
+		BackPropagation(mdata.first[i],output, mdata.second[i]);
 	}
 
 
@@ -150,26 +151,128 @@ double CS397::NeuralNet::ReLU(const double & x)
 	return std::fmax(0, x);
 }
 
-void CS397::NeuralNet::BackPropagation(const std::vector<double>& output, const std::vector<double> & real_output)
+void CS397::NeuralNet::BackPropagation(const std::vector<double> & input,const std::vector<double>& output, const std::vector<double> & real_output)
 {
-	double alpha = 0 ;
-	for (int l = 0; l < output.size(); l++)
-	{
-		alpha += output[l] - real_output[l];
-	}
+	std::vector<std::vector<double>> values = ValuesBeforeFunction(input);
 
-	for (unsigned i = mweigths.size() - 1; i > 0; i--)
+	for (unsigned i = mweigths.size() - 2; i >= 0; i--)
 	{
-		for (unsigned j = 0; j < mweigths[i].size(); j++)
+		if (i == mweigths.size() - 2)
 		{
-			
-			for (unsigned k = 0; k < mweigths[i][j].size(); k++)
+			for (unsigned j = 0; j < mweigths[i].size(); j++)
 			{
+
+				for (unsigned k = 0; k < mweigths[i][j].size(); k++)
+				{
+
+					double alpha = -(real_output[k] - output[k]);
+
+					double beta = 1.0 - pow(output[k], 2);
+
+					double gamma = values[i][j];
+
+					mweigths[i][j][k] -= mlr * (alpha * beta * gamma);
+				}
+			}
+		}
+		else
+		{
+			for (unsigned j = 0; j < mweigths[i].size(); j++)
+			{
+				for (unsigned k = 0; k < mweigths[i][j].size(); k++)
+				{
+					double alpha = 0;
+
+					for (int l = 0; l < output.size(); l++)
+					{
+						alpha += -(real_output[l] - output[l]) * (1.0 - pow(output[l], 2)) * mweigths[i + 1][k][l];
+					}
+
+					double beta = 1.0 - pow(values[i + 1][k], 2);
+
+					double gamma = values[i][j];
+
+					mweigths[i][j][k] -= mlr * (alpha * beta * gamma);
+				}
+			}
 				
 
-			}
+			
 
 		}
+
+		if (i == 0)
+			return;
+
+	}
+}
+
+double CS397::NeuralNet::SubstractVectors(const std::vector<double>& a, const std::vector<double>& b)
+{
+	double value = 0;
+	for (int i = 0; i < a.size(); i++)
+	{
+		value += a[i] - b[i];
+	}
+	return value;
+}
+
+std::vector<std::vector<double>> CS397::NeuralNet::ValuesBeforeFunction(const std::vector<double>& input)
+{
+
+	//For each final Y
+	std::vector<double> prev = input;
+	prev.push_back(1);
+
+	std::vector<std::vector<double>> values;
+	//For each final outputs
+//	for (int i = 0; i < mtopology.back(); i++)
+	//{
+	double result = 0;
+
+	for (unsigned i = 0; i < mweigths.size(); i++)
+	{
+		if (i == mweigths.size() - 1)
+			return values;
+		else
+		{
+			prev[prev.size() - 1] = 1;
+		}
+		//Final layer
+		std::vector<double> next(mweigths[i + 1].size(), 0);
+		values.push_back(std::vector<double>(mweigths[i].size()));
+		for (unsigned j = 0; j < mweigths[i].size(); j++)
+		{
+			//double next_value = 0;
+			values[i][j] = prev[j];
+			for (unsigned k = 0; k < mweigths[i][j].size(); k++)
+			{
+				next[k] += prev[j] * mweigths[i][j][k];
+			}
+
+			//next.push_back(next_value);
+		}
+	//	values.push_back(next);
+
+		for (auto & value : next)
+		{
+			switch (mfunction)
+			{
+			case ActivationFunction::Type::eSigmoid:
+			{
+				value = Sigmoid(value);
+				break;
+			}
+			case ActivationFunction::Type::eTanh:
+			{
+				value = Tanh(value);
+				break;
+			}
+			}
+		}
+
+		prev = next;
+
 
 	}
 }

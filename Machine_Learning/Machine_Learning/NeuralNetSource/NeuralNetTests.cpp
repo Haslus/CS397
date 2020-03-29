@@ -92,16 +92,17 @@ TEST(NeuralNet, IterationXDataset_2_1)
     Dataset train_dataset = DatasetCreator::GenerateXDataset(200);
     Dataset test_dataset  = DatasetCreator::GenerateXDataset(30);
 
-    NeuralNet net = NeuralNet(train_dataset, Topology, LearningRate, ActivationFunction::Type::eTanh);
+	NeuralNet net = NeuralNet(train_dataset, Topology, LearningRate, ActivationFunction::Type::eTanh);
 
     // train dataset multiple times
     for (size_t e = 0; e < Epochs; e++)
     {
+		double cost = net.Cost(test_dataset);
         net.Iteration();
     }
 
     // test dataset to compute average error
-    double cost = net.Cost(test_dataset);
+   double cost = net.Cost(test_dataset);
 
     // check cost value
     EXPECT_LT(cost, 0.1);

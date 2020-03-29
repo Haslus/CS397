@@ -49,7 +49,7 @@ public:
 	double TanhDerivative(const double & x);
 	double ReLU(const double& x);
 
-	void BackPropagation(const std::vector<double> & output, const std::vector<double> & real_output);
+	void BackPropagation(const std::vector<double> & input,const std::vector<double> & output, const std::vector<double> & real_output);
 
 	DatasetCreator::Dataset mdata;           // dataset to train the network
 	std::vector<unsigned> mtopology;           // number of layers and amount on neurons in each layer
@@ -58,6 +58,8 @@ public:
 
 	NetworkWeights mweigths;
 
+	double SubstractVectors(const std::vector<double> & a, const std::vector<double> & b);
+	std::vector<std::vector<double>> ValuesBeforeFunction(const std::vector<double> & input);
 };
 
 }
