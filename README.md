@@ -1,1 +1,1 @@
-CS397
+CS397 - Machine Learning
