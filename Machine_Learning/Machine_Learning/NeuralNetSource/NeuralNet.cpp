@@ -1,22 +1,25 @@
 #include "PRNG.h"
 #include "NeuralNet.h"
-
+#include <iostream>
+/*******************************
+	Custom Constructor
+*******************************/
 CS397::NeuralNet::NeuralNet(const DatasetCreator::Dataset & data, const std::vector<unsigned>& topology, double lr, ActivationFunction::Type function)
 {
 	mdata = data;
 	mtopology = topology;
 	mlr = lr;
 	mfunction = function;
-	for (int i = 0; i < mtopology.size(); i++)
+	for (unsigned i = 0; i < mtopology.size(); i++)
 	{
 		std::vector<std::vector<double>> a;
 
-		for (int j = 0; j < mtopology[i] + 1; j++)
+		for (unsigned j = 0; j < mtopology[i] + 1; j++)
 		{
 			std::vector<double > w;
 			if (i == mtopology.size() - 1)
 			{
-				for (int k = 0; k < mtopology.back(); k++)
+				for (unsigned k = 0; k < mtopology.back(); k++)
 				{
 					a.push_back(std::vector<double>());
 				}
@@ -25,7 +28,7 @@ CS397::NeuralNet::NeuralNet(const DatasetCreator::Dataset & data, const std::vec
 			else
 			{
 
-				for(int k = 0; k < mtopology[i + 1]; k++)
+				for(unsigned k = 0; k < mtopology[i + 1]; k++)
 					w.push_back(PRNG::RandomNormalizedDouble());
 			}
 
@@ -35,23 +38,22 @@ CS397::NeuralNet::NeuralNet(const DatasetCreator::Dataset & data, const std::vec
 		mweigths.push_back(a);
 	}
 }
-
+/*******************************
+	Forward propagation, returns an output
+*******************************/
 std::vector<double> CS397::NeuralNet::ForwardPropagation(const std::vector<double>& input)
 {
 
-	//For each final Y
 	std::vector<double> prev = input;
 	prev.push_back(1);
 
-	//For each final outputs
-//	for (int i = 0; i < mtopology.back(); i++)
-	//{
 	double result = 0;
 
+	//For each final Y
 	for (unsigned i = 0; i < mweigths.size(); i++)
 	{
 		if (i == mweigths.size() - 1)
-			return prev;
+			break;
 		else
 		{
 			prev[prev.size() - 1] = 1;
@@ -60,15 +62,13 @@ std::vector<double> CS397::NeuralNet::ForwardPropagation(const std::vector<doubl
 		std::vector<double> next(mweigths[i + 1].size(),0);
 		for (unsigned j = 0; j < mweigths[i].size(); j++)
 		{
-			//double next_value = 0;
 			for (unsigned k = 0; k < mweigths[i][j].size(); k++)
 			{
 				next[k] += prev[j] * mweigths[i][j][k];
 			}
 
-			//next.push_back(next_value);
 		}
-
+		//Apply function
 		for (auto & value : next)
 		{
 			switch (mfunction)
@@ -90,8 +90,13 @@ std::vector<double> CS397::NeuralNet::ForwardPropagation(const std::vector<doubl
 
 		
 	}
-}
 
+	return prev;
+
+}
+/*******************************
+	Iterate once
+*******************************/
 void CS397::NeuralNet::Iteration()
 {
 
@@ -103,97 +108,135 @@ void CS397::NeuralNet::Iteration()
 
 
 }
-
+/*******************************
+	Get weights
+*******************************/
 CS397::NetworkWeights CS397::NeuralNet::GetWeights() const
 {
 	return mweigths;
 }
-
+/*******************************
+	Get cost of Neural Network
+*******************************/
 double CS397::NeuralNet::Cost(const DatasetCreator::Dataset & data)
 {
 	double cost = 0;
 	for (int i = 0; i < data.first.size(); i++)
 	{
 		auto output = ForwardPropagation(data.first[i]);
-		double value = 0;
+
 		for (int j = 0; j < output.size(); j++)
 		{
-			value += output[j] - data.second[i][j];
+			cost += pow(data.second[i][j] - output[j],2);
+			
 		}
 
-		cost += pow(value, 2);
 	}
 	return cost  / (2.0 * data.first.size());
 }
-
+/*******************************
+	Sigmoid function
+*******************************/
 double CS397::NeuralNet::Sigmoid(const double & x)
 {
 	return 1.0 / (1.0 + exp(-x));
 }
 
-double CS397::NeuralNet::SigmoidDerivative(const double & x)
-{
-	return Sigmoid(x) * (1.0 - Sigmoid(x));
-}
-
+/*******************************
+	Tanh fuction
+*******************************/
 double CS397::NeuralNet::Tanh(const double & x)
 {
 	return 2.0 * Sigmoid(2.0 * x) - 1.0;
 }
 
-double CS397::NeuralNet::TanhDerivative(const double & x)
-{
-	return 1 - pow(tanh(x), 2);
-}
-
-double CS397::NeuralNet::ReLU(const double & x)
-{
-	return std::fmax(0, x);
-}
-
+/*******************************
+	Backpropagate the error and fix it
+*******************************/
 void CS397::NeuralNet::BackPropagation(const std::vector<double> & input,const std::vector<double>& output, const std::vector<double> & real_output)
 {
 	std::vector<std::vector<double>> values = ValuesBeforeFunction(input);
+	std::vector<std::vector<std::vector<double>>> gradients(mweigths.size());
 
-	for (unsigned i = mweigths.size() - 2; i >= 0; i--)
+	NetworkWeights weights = mweigths;
+	//For each layer
+	for (unsigned i = static_cast<int>(mweigths.size() - 2); i >= 0; i--)
 	{
+		std::vector<std::vector<double>> layer_grad;
 		if (i == mweigths.size() - 2)
 		{
 			for (unsigned j = 0; j < mweigths[i].size(); j++)
 			{
-
+				std::vector<double> gradient;
 				for (unsigned k = 0; k < mweigths[i][j].size(); k++)
 				{
 
 					double alpha = -(real_output[k] - output[k]);
 
-					double beta = 1.0 - pow(output[k], 2);
+					double beta = 0;
+
+					switch (mfunction)
+					{
+					case ActivationFunction::Type::eSigmoid:
+					{
+						beta = output[k] * ( 1.0 - output[k]);
+						break;
+					}
+					case ActivationFunction::Type::eTanh:
+					{
+						beta = 1.0 - pow(output[k], 2);
+						break;
+					}
+					}
 
 					double gamma = values[i][j];
 
-					mweigths[i][j][k] -= mlr * (alpha * beta * gamma);
+					gradient.push_back(alpha * beta);
+
+					weights[i][j][k] = weights[i][j][k] - mlr *alpha * beta * gamma;
 				}
+
+				layer_grad.push_back(gradient);
 			}
 		}
 		else
 		{
 			for (unsigned j = 0; j < mweigths[i].size(); j++)
 			{
+				std::vector<double> gradient;
 				for (unsigned k = 0; k < mweigths[i][j].size(); k++)
 				{
 					double alpha = 0;
 
-					for (int l = 0; l < output.size(); l++)
+					for (int l = 0; l < gradients[i + 1][k].size(); l++)
 					{
-						alpha += -(real_output[l] - output[l]) * (1.0 - pow(output[l], 2)) * mweigths[i + 1][k][l];
+						alpha += gradients[i + 1][k][l] * mweigths[i + 1][k][l];
 					}
 
-					double beta = 1.0 - pow(values[i + 1][k], 2);
+					double beta = 0;
+
+					switch (mfunction)
+					{
+					case ActivationFunction::Type::eSigmoid:
+					{
+						beta = values[i + 1][k] * (1.0 - values[i + 1][k]);
+						break;
+					}
+					case ActivationFunction::Type::eTanh:
+					{
+						beta = 1.0 - pow(values[i + 1][k], 2);
+						break;
+					}
+					}
 
 					double gamma = values[i][j];
 
-					mweigths[i][j][k] -= mlr * (alpha * beta * gamma);
+					gradient.push_back(alpha * beta);
+
+					weights[i][j][k] = weights[i][j][k] - mlr * alpha * beta * gamma;
 				}
+
+				layer_grad.push_back(gradient);
 			}
 				
 
@@ -201,39 +244,33 @@ void CS397::NeuralNet::BackPropagation(const std::vector<double> & input,const s
 
 		}
 
-		if (i == 0)
-			return;
+		gradients[i] = layer_grad;
 
+		if( i == 0)
+			break;
 	}
-}
 
-double CS397::NeuralNet::SubstractVectors(const std::vector<double>& a, const std::vector<double>& b)
-{
-	double value = 0;
-	for (int i = 0; i < a.size(); i++)
-	{
-		value += a[i] - b[i];
-	}
-	return value;
+	mweigths = weights;
 }
-
+/*******************************
+	Similar to ForwardPropagation
+	but stores the value of each node
+*******************************/
 std::vector<std::vector<double>> CS397::NeuralNet::ValuesBeforeFunction(const std::vector<double>& input)
 {
 
-	//For each final Y
 	std::vector<double> prev = input;
 	prev.push_back(1);
 
 	std::vector<std::vector<double>> values;
-	//For each final outputs
-//	for (int i = 0; i < mtopology.back(); i++)
-	//{
+
 	double result = 0;
 
+	//For each final Y
 	for (unsigned i = 0; i < mweigths.size(); i++)
 	{
 		if (i == mweigths.size() - 1)
-			return values;
+			break;
 		else
 		{
 			prev[prev.size() - 1] = 1;
@@ -243,16 +280,16 @@ std::vector<std::vector<double>> CS397::NeuralNet::ValuesBeforeFunction(const st
 		values.push_back(std::vector<double>(mweigths[i].size()));
 		for (unsigned j = 0; j < mweigths[i].size(); j++)
 		{
-			//double next_value = 0;
+			
 			values[i][j] = prev[j];
 			for (unsigned k = 0; k < mweigths[i][j].size(); k++)
 			{
 				next[k] += prev[j] * mweigths[i][j][k];
 			}
 
-			//next.push_back(next_value);
+			
 		}
-	//	values.push_back(next);
+	
 
 		for (auto & value : next)
 		{
@@ -275,4 +312,6 @@ std::vector<std::vector<double>> CS397::NeuralNet::ValuesBeforeFunction(const st
 
 
 	}
+
+	return values;
 }

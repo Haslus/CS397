@@ -42,24 +42,21 @@ public:
     // computes the cost of the network for the provided dataset
 	double Cost(const DatasetCreator::Dataset & data);
 
-	//Student Stuff
 	double Sigmoid(const double & x);
-	double SigmoidDerivative(const double & x);
+
 	double Tanh(const double & x);
-	double TanhDerivative(const double & x);
-	double ReLU(const double& x);
 
-	void BackPropagation(const std::vector<double> & input,const std::vector<double> & output, const std::vector<double> & real_output);
+	void BackPropagation(const std::vector<double>& input, const std::vector<double>& output, const std::vector<double>& real_output);
 
-	DatasetCreator::Dataset mdata;           // dataset to train the network
-	std::vector<unsigned> mtopology;           // number of layers and amount on neurons in each layer
-	double mlr;                                  // learning rate
-	ActivationFunction::Type mfunction;		 // activation function
 
+	std::vector<std::vector<double>> ValuesBeforeFunction(const std::vector<double>& input);
+
+	DatasetCreator::Dataset mdata;
+	std::vector<unsigned> mtopology;
+	double mlr;
+	ActivationFunction::Type mfunction;
 	NetworkWeights mweigths;
 
-	double SubstractVectors(const std::vector<double> & a, const std::vector<double> & b);
-	std::vector<std::vector<double>> ValuesBeforeFunction(const std::vector<double> & input);
 };
 
 }

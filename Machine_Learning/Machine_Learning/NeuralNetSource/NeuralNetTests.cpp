@@ -80,6 +80,73 @@ TEST(NeuralNet, ForwardPropagation_2_3)
     }
 }
 
+TEST(NeuralNet, Cost_2_1)
+{
+    srand(0);
+    // net config
+    const std::vector<unsigned> Topology({ 2, 2, 1 });
+    const double                LearningRate = 0.01;
+
+    // generate datasets
+    Dataset train_dataset = DatasetCreator::GenerateXDataset(200);
+    Dataset test_dataset  = DatasetCreator::GenerateXDataset(30);
+
+    NeuralNet net = NeuralNet(train_dataset, Topology, LearningRate);
+
+    // test dataset to compute average error
+    double cost = net.Cost(test_dataset);
+
+    // check cost value
+    EXPECT_NEAR(cost, 0.251, 0.001);
+}
+
+TEST(NeuralNet, IterationBPXDataset_2_1)
+{
+    srand(0);
+    // net config
+    const std::vector<unsigned> Topology({ 2, 2, 1 });
+    const double                LearningRate = 0.01;
+    const unsigned              Epochs       = 1;
+
+    // generate datasets
+    Dataset train_dataset = DatasetCreator::GenerateXDataset(200);
+    Dataset test_dataset  = DatasetCreator::GenerateXDataset(30);
+
+    NeuralNet net = NeuralNet(train_dataset, Topology, LearningRate, ActivationFunction::Type::eTanh);
+	
+    // train dataset multiple times
+    for (size_t e = 0; e < Epochs; e++)
+    {
+        net.Iteration();
+    }
+
+    const NetworkWeights resultPostIteration = {
+        { { -0.081607, 0.216113 }, { 0.841705, -0.402012 }, { -0.496121, -0.259302 } },
+        { { -0.236406 }, { 0.504009 }, { -0.021947 } },
+        { {} }
+    };
+	
+    // retrieve weights and compare
+    NetworkWeights weigths = net.GetWeights();
+
+    for (size_t l = 0; l < resultPostIteration.size(); l++)
+    {
+        for (size_t n = 0; n < resultPostIteration[l].size(); n++)
+        {
+            for (size_t w = 0; w < resultPostIteration[l][n].size(); w++)
+            {
+                EXPECT_NEAR(weigths[l][n][w], resultPostIteration[l][n][w], 0.001);
+            }
+        }
+    }
+
+    // test dataset to compute average error
+    double cost = net.Cost(test_dataset);
+
+    // check cost value
+    EXPECT_LT(cost, 0.2);
+}
+
 TEST(NeuralNet, IterationXDataset_2_1)
 {
     srand(0);
@@ -92,17 +159,16 @@ TEST(NeuralNet, IterationXDataset_2_1)
     Dataset train_dataset = DatasetCreator::GenerateXDataset(200);
     Dataset test_dataset  = DatasetCreator::GenerateXDataset(30);
 
-	NeuralNet net = NeuralNet(train_dataset, Topology, LearningRate, ActivationFunction::Type::eTanh);
+    NeuralNet net = NeuralNet(train_dataset, Topology, LearningRate, ActivationFunction::Type::eTanh);
 
     // train dataset multiple times
     for (size_t e = 0; e < Epochs; e++)
     {
-		double cost = net.Cost(test_dataset);
         net.Iteration();
     }
 
     // test dataset to compute average error
-   double cost = net.Cost(test_dataset);
+    double cost = net.Cost(test_dataset);
 
     // check cost value
     EXPECT_LT(cost, 0.1);
@@ -207,7 +273,7 @@ double ComputeHandwrittenAccuracy(NeuralNet & net, Dataset & data)
         if (realNum == guessedNum)
             accuracy += 1.0;
 
-        //std::cout << "P: " << guessedNum << " R:" << realNum << std::endl;
+      //  std::cout << "P: " << guessedNum << " R:" << realNum << std::endl;
     }
 
     return accuracy / data.first.size();
@@ -219,8 +285,8 @@ TEST(NeuralNet, Handwritten)
     
     srand(0);
     // net config
-    const std::vector<unsigned> Topology({ 1, 1, 1 });
-    const double                LearningRate = 0.1;
+    const std::vector<unsigned> Topology({ 784, 100, 30, 10 });
+    const double                LearningRate = 0.01;
     const unsigned              Epochs       = 5;
 
     std::pair<Dataset, Dataset> splittedDataset = LoadHandwrittenDigits();
